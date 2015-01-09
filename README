@@ -22,7 +22,10 @@ Barnyard2.  Right now,  they are:
     EVENT_INFO_IPV6_DST
     EVENT_INFO_JSNORM_DATA
 
-2. New database schema to store Unified2 "ExtraData". 
+2. New database schema to store Unified2 "ExtraData".  Database differences
+can be found at:
+
+https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
 
 ------------------------------------------------------------------------------
 0. SUMMARY
