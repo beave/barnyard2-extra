@@ -4077,8 +4077,12 @@ void DecodeIPV6Options(int type, const uint8_t *pkt, uint32_t len, Packet *p)
 
     if(p->ip6_extension_count < IP6_EXTMAX)
     {
-        p->ip6_extensions[p->ip6_extension_count].type = type;
-        p->ip6_extensions[p->ip6_extension_count].data = pkt;
+
+    	if ( (p->ip6_extension_count == 0)	
+		{
+        	p->ip6_extensions[p->ip6_extension_count].type = type;
+        	p->ip6_extensions[p->ip6_extension_count].data = pkt;
+		}
 
         switch (type)
         {

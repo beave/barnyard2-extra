@@ -231,4 +231,11 @@ typedef struct _Unified2EventCommon
     uint32_t priority_id;
 } Unified2EventCommon;
 
+typedef struct _Unified2CacheCommon
+{
+    uint32_t sensor_id;
+    uint32_t event_id;
+    uint32_t event_second;
+} Unified2CacheCommon;
+
 #endif /* __UNIFIED2_H__ */
