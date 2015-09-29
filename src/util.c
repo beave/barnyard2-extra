@@ -2783,7 +2783,7 @@ char *DNS_Lookup( unsigned long u32_ip)
 
     if ( result != 0 ) 
     	{
-		LogMessage("DNS lookup failure for '%s' [Error: %d].\n", ip_string,  gai_strerror(result)); 
+		LogMessage("DNS lookup failure for '%s' [Error: %s].\n", ip_string,  gai_strerror(result)); 
 	}
 
     ret = (char*)&rhost; 
