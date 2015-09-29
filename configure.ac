@@ -487,6 +487,13 @@ if test "x$enable_mpls" = "xyes"; then
     CPPFLAGS="$CPPFLAGS -DMPLS"
 fi
 
+AC_ARG_ENABLE(dns,
+[  --enable-dns             Enable DNS database support],
+       enable_dns="$enableval", enable_dns="no")
+if test "x$enable_dns" = "xyes"; then
+    CPPFLAGS="$CPPFLAGS -DDNS"
+fi
+
 AC_ARG_ENABLE(prelude,
 [  --enable-prelude         Enable Prelude Hybrid IDS support],
        enable_prelude="$enableval", enable_prelude="no")

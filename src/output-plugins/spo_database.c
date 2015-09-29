@@ -102,6 +102,8 @@ static const char* FATAL_NO_SUPPORT_2 =
 
 #include "output-plugins/spo_database.h"
 
+#define MAX_DNS_LENGTH 255
+
 void DatabaseCleanSelect(DatabaseData *data)
 {
     
@@ -1700,6 +1702,12 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
 			      u_int32_t event_type,
 			      u_int32_t i_sig_id)
 {
+
+#ifdef DNS
+    char dns_src[MAX_DNS_LENGTH] = { 0 };
+    char dns_dst[MAX_DNS_LENGTH] = { 0 }; 
+#endif
+
     char *SQLQueryPtr = NULL;
     int i = 0;    
     
@@ -2184,6 +2192,49 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
 		break;
 		/* DEFAULT */
 	    }
+
+
+#ifdef DNS
+
+if ( (SnortSnprintf(dns_src, MAX_DNS_LENGTH , "%s", DNS_Lookup((u_long)p->iph->ip_src.s_addr))) != SNORT_SNPRINTF_SUCCESS ) 
+            {
+
+	    LogMessage("WARNING [%s()]: SnortSnprintf for DNS source failed for Event[0x%x] Event Type [%u] (P)acket [0x%x].  Continuing....\n",
+                   __FUNCTION__,
+                   event,
+                   event_type,
+                   p);
+
+            }
+ 
+if ( (SnortSnprintf(dns_dst, MAX_DNS_LENGTH, "%s", DNS_Lookup((u_long)p->iph->ip_dst.s_addr))) != SNORT_SNPRINTF_SUCCESS )
+           {
+
+	   LogMessage("WARNING [%s()]: SnortSnprintf for DNS destination failed for Event[0x%x] Event Type [%u] (P)acket [0x%x].  Continuing....\n",
+                   __FUNCTION__,
+                   event,
+                   event_type,
+                   p);
+           };
+
+      if ( (SnortSnprintf(SQLQueryPtr, MAX_QUERY_LENGTH,
+		"INSERT INTO "
+		"dns (sid, cid, src_host, dst_host) "
+		"VALUES (%u,%u,'%s','%s');",
+		data->sid,
+		data->cid,
+		dns_src, 
+		dns_dst)) != SNORT_SNPRINTF_SUCCESS )
+	{
+
+		LogMessage("WARNING [%s()]: SnortSnprintf for DNS data failed for Event[0x%x] Event Type [%u] (P)acket [0x%x].  Skipping....\n", 
+                   __FUNCTION__,
+                   event,
+                   event_type,
+                   p);
+	}
+
+#endif
                 
 	    /*** Build the query for the IP Header ***/
 	    if(p->iph)
@@ -2235,8 +2286,7 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
 			goto bad_query;
 		    }
 		}
-	    
-		
+
 		/*** Build querys for the IP Options ***/
 		if(data->detail)
 		{
@@ -5483,11 +5533,28 @@ void DatabaseExtra(void *event, DatabaseData* data)
         return;
     }
 bad_query:
+
     ErrorMessage("Database: Unable to construct extra query - output error or truncation\n");
-    if (extraData != NULL)               free(extraData);
-    if (packet_data != NULL)             free(packet_data);
-    if (packet_data_not_escaped != NULL) free(packet_data_not_escaped);
-    if (insert0 != NULL)                 free(insert0);
+
+    if (extraData != NULL) 
+    	{
+	free(extraData);
+	}
+
+    if (packet_data != NULL) 
+    	{
+	free(packet_data);
+	}
+
+    if (packet_data_not_escaped != NULL) 
+    	{
+	free(packet_data_not_escaped);
+	}
+
+    if (insert0 != NULL)
+    	{
+	free(insert0);
+	}
 }
 
 

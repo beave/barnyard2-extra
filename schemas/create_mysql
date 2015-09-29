@@ -178,3 +178,15 @@ CREATE TABLE extra (id INT AUTO_INCREMENT NOT NULL,
                     PRIMARY KEY (id),
                     KEY `event` (sid,cid));
 
+
+# This is for when DNS lookups are enabled
+
+CREATE TABLE dns (sid         INT      UNSIGNED NOT NULL,
+		  cid         INT      UNSIGNED NOT NULL,
+		  src_host    VARCHAR(255),
+		  dst_host    VARCHAR(255),
+		  INDEX       src_host (src_host),
+	 	  INDEX	      dst_host (dst_host), 
+                  KEY `event` (sid,cid));
+
+

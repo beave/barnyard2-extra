@@ -2755,3 +2755,38 @@ int BY2Strtoul(char *inStr,unsigned long *ul_ptr)
     
     return 0;
 }
+
+#ifdef DNS
+
+char *DNS_Lookup( unsigned long u32_ip)
+{
+
+    char *ip_string = NULL;
+    static char rhost[255];
+    char *ret = (char*)malloc(255); 
+    int result = 0; 
+
+    /* Convert 32 bit in to string */
+
+    struct in_addr ip_addr;
+    ip_addr.s_addr = u32_ip;
+    ip_string = inet_ntoa(ip_addr);
+
+    struct sockaddr_in sa;
+    sa.sin_family = AF_INET;
+    inet_pton(AF_INET, ip_string, &sa.sin_addr);
+   
+    result = getnameinfo((struct sockaddr*)&sa, sizeof(sa), rhost, sizeof(rhost), NULL, 0, 0);
+
+    if ( result ) 
+    	{
+		LogMessage("DNS lookup failure for '%s' [err: %s].\n", ip_string,  strerror(errno)); 
+		printf("Warning!"); 
+	}
+
+    ret = (char*)&rhost; 
+    return(ret);
+
+}
+
+#endif
