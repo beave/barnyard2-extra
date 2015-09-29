@@ -102,8 +102,6 @@ static const char* FATAL_NO_SUPPORT_2 =
 
 #include "output-plugins/spo_database.h"
 
-#define MAX_DNS_LENGTH 255
-
 void DatabaseCleanSelect(DatabaseData *data)
 {
     

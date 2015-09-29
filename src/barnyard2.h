@@ -67,6 +67,10 @@
 
 #define STD_BUF  1024
 
+#ifdef DNS
+#define MAX_DNS_LENGTH 255
+#endif
+
 #define MAX_PIDFILE_SUFFIX 11 /* uniqueness extension to PID file, see '-R' */
 
 #ifndef WIN32

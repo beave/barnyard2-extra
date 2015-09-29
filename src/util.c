@@ -2758,12 +2758,15 @@ int BY2Strtoul(char *inStr,unsigned long *ul_ptr)
 
 #ifdef DNS
 
+/* This function does reverse DNS lookups.  This data is used for the "dns" 
+ * table,  which is associated with the event */
+
 char *DNS_Lookup( unsigned long u32_ip)
 {
 
     char *ip_string = NULL;
-    static char rhost[255];
-    char *ret = (char*)malloc(255); 
+    static char rhost[MAX_DNS_LENGTH];
+    char *ret = (char*)malloc(MAX_DNS_LENGTH); 
     int result = 0; 
 
     /* Convert 32 bit in to string */
@@ -2778,10 +2781,9 @@ char *DNS_Lookup( unsigned long u32_ip)
    
     result = getnameinfo((struct sockaddr*)&sa, sizeof(sa), rhost, sizeof(rhost), NULL, 0, 0);
 
-    if ( result ) 
+    if ( result != 0 ) 
     	{
-		LogMessage("DNS lookup failure for '%s' [err: %s].\n", ip_string,  strerror(errno)); 
-		printf("Warning!"); 
+		LogMessage("DNS lookup failure for '%s' [Error: %d].\n", ip_string,  gai_strerror(result)); 
 	}
 
     ret = (char*)&rhost; 
