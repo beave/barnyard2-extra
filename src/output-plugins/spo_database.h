@@ -617,6 +617,9 @@ u_int32_t dbConnectionStatusPOSTGRESQL(dbReliabilityHandle *pdbRH);
 u_int32_t dbConnectionStatusODBC(dbReliabilityHandle *pdbRH);
 u_int32_t dbConnectionStatusMYSQL(dbReliabilityHandle *pdbRH);
 
+#ifdef DNS
+void dbDNSData(Packet *p, DatabaseData* data);
+#endif
 
 #ifdef ENABLE_ODBC
 void ODBCPrintError(DatabaseData *data,SQLSMALLINT iSTMT_type);

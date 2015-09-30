@@ -231,7 +231,6 @@ u_int32_t string_sanitize_character(char *input,char ichar);
 
 char *DNS_Lookup(unsigned long u32_ip); 
 
-
 /***********************************************************
  If you use any of the functions in this section, you need
  to call free() on the char * that is returned after you are

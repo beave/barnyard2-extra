@@ -425,6 +425,10 @@ typedef struct _Barnyard2Config
 
     Spooler *spooler; /* Used to know if we need to call spoolerClose */
 
+#ifdef DNS
+    int dns; 
+#endif
+
 } Barnyard2Config;
 
 /* struct to collect packet statistics */
