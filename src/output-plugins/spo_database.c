@@ -5523,8 +5523,8 @@ void dbDNSData(Packet *p, DatabaseData* data)
 	char *insert0 = NULL; 
 	insert0 = (char *) SnortAlloc(MAX_QUERY_LENGTH + 1);
 
-	char dns_src[MAX_DNS_LENGTH];
-	char dns_dst[MAX_DNS_LENGTH]; 
+	char dns_src[MAX_DNS_LENGTH] = { 0 };
+	char dns_dst[MAX_DNS_LENGTH] = { 0 }; 
 
  	if ( ( SnortSnprintf(dns_src, MAX_DNS_LENGTH, "%s", DNS_Lookup((u_long)p->iph->ip_src.s_addr ))) != SNORT_SNPRINTF_SUCCESS ) 
 		{
