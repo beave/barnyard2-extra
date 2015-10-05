@@ -5521,7 +5521,7 @@ void dbDNSData(Packet *p, DatabaseData* data)
 
 
 	char *insert0 = NULL; 
-	insert0 = (char *) SnortAlloc(MAX_DNS_LENGTH + 1);
+	insert0 = (char *) SnortAlloc(MAX_QUERY_LENGTH + 1);
 
 	char dns_src[MAX_DNS_LENGTH];
 	char dns_dst[MAX_DNS_LENGTH]; 
@@ -5539,24 +5539,32 @@ void dbDNSData(Packet *p, DatabaseData* data)
                 }
 
 
-	if ( ( SnortSnprintf(insert0, MAX_QUERY_LENGTH, 
-		"INSERT INTO "
-		"dns (sid, cid,src_host,dst_host) "
-		" VALUES (%u,%u,'%s','%s')", 
-		data->sid,
-		data->cid, 
-		dns_src, 
-		dns_dst)) != SNORT_SNPRINTF_SUCCESS ) 
+
+	/* If neither have a valid DNS value,  don't both inserting */
+
+	if ( dns_src[0] != '\0' && dns_dst[0] != '\0' ) 
 		{
 
-		LogMessage("** Warning: SnortSnprintf failed in %s() for SQL Insert!! Continuing.....\n", __FUNCTION__);
-		return;
+		if ( ( SnortSnprintf(insert0, MAX_QUERY_LENGTH, 
+			"INSERT INTO "
+			"dns (sid, cid,src_host,dst_host) "
+			" VALUES (%u,%u,'%s','%s')", 
+			data->sid,
+			data->cid, 
+			dns_src, 
+			dns_dst)) != SNORT_SNPRINTF_SUCCESS ) 
+			{
+
+			LogMessage("** Warning: SnortSnprintf failed in %s() for SQL Insert!! Continuing.....\n", __FUNCTION__);
+			return;
+			}
+
+		if (Insert(insert0, data,0) != 0) 
+			{
+			goto bad_query;
+			}
 		}
 
-	if (Insert(insert0, data,0) != 0) 
-		{
-		goto bad_query;
-		}
 
 
 free(insert0); 
