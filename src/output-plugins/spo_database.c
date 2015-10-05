@@ -5538,17 +5538,27 @@ void dbDNSData(Packet *p, DatabaseData* data)
                 return;
                 }
 
-
-
 	/* If neither have a valid DNS value,  don't both inserting */
 
 	if ( dns_src[0] != '\0' && dns_dst[0] != '\0' ) 
 		{
 
+		if ( dns_src[0] == '\0' ) 
+			{
+			SnortSnprintf(dns_src, sizeof(dns_src), "[No DNS data]"); 
+			}
+
+	
+		if ( dns_dst[0] == '\0' ) 
+			{
+			SnortSnprintf(dns_dst, sizeof(dns_dst), "[No DNS data]");
+			}
+
+		
 		if ( ( SnortSnprintf(insert0, MAX_QUERY_LENGTH, 
 			"INSERT INTO "
 			"dns (sid, cid,src_host,dst_host) "
-			" VALUES (%u,%u,'%s','%s')", 
+			" VALUES (%u,%u,'%s','%s')",  
 			data->sid,
 			data->cid, 
 			dns_src, 
