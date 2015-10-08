@@ -75,6 +75,7 @@
 #include "output-plugins/spo_echidna.h"
 #include "output-plugins/spo_sguil.h"
 #include "output-plugins/spo_syslog_full.h"
+#include "output-plugins/spo_log_full.h"
 
 extern InputConfigFuncNode  *input_config_funcs;
 extern OutputConfigFuncNode *output_config_funcs;
@@ -367,6 +368,8 @@ void RegisterOutputPlugins(void)
     SguilSetup();
 
     OpSyslog_Setup();
+
+    LogFullSetup();
 
 }
 
