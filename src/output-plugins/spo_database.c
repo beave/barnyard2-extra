@@ -2531,21 +2531,25 @@ TransacRollback:
         }
 
 #ifdef DNS
-    	dbDNSData(p,data);
+    if ( dbDNSData(p,data) ) 
+    {
+       FatalError("[dbDNSData()]: Failed, stopping processing!\n"); 
+    }
+
 #endif
 
     if( dbProcessSignatureInformation(data,event,event_type,&sig_id))
     {
 	/* XXX */
 	setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-	FatalError("[dbProcessSignatureInformation()]: Failed, stoping processing \n");
+	FatalError("[dbProcessSignatureInformation()]: Failed, stopping processing!\n");
     }
     
     if( dbProcessEventInformation(data,p,event,event_type,sig_id))
     {
 	/* XXX */
 	setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-	FatalError("[dbProcessEventInformation()]: Failed, stoping processing \n");
+	FatalError("[dbProcessEventInformation()]: Failed, stopping processing!\n");
     }
 
     
@@ -5516,7 +5520,7 @@ bad_query:
 /* dbDNSData() - Does reverse DNS lookups up p->iph->ip_src and p->iph->ip_dst
  * and stores them in the "dns" table. */
 
-void dbDNSData(Packet *p, DatabaseData* data)
+int dbDNSData(Packet *p, DatabaseData* data)
 {
 
 
@@ -5529,31 +5533,19 @@ void dbDNSData(Packet *p, DatabaseData* data)
  	if ( ( SnortSnprintf(dns_src, MAX_DNS_LENGTH, "%s", DNS_Lookup((u_long)p->iph->ip_src.s_addr ))) != SNORT_SNPRINTF_SUCCESS ) 
 		{
 		LogMessage("** Warning: SnortSnprintf failed in %s for dns_src!", __FUNCTION__ );
-		return;
+		return 1;
 		}
 
         if ( ( SnortSnprintf(dns_dst, MAX_DNS_LENGTH+1, "%s", DNS_Lookup((u_long)p->iph->ip_dst.s_addr ))) != SNORT_SNPRINTF_SUCCESS )
                 {
                 LogMessage("** Warning: SnortSnprintf failed in %s for dns_dst!", __FUNCTION__ );
-                return;
+                return 1;
                 }
 
-	/* If neither have a valid DNS value,  don't both inserting */
+	/* If neither have a valid DNS value,  don't inserting */
 
-	if ( dns_src[0] != '\0' && dns_dst[0] != '\0' ) 
+	if (!strcmp(dns_src, "") && !strcmp(dns_src, "") )
 		{
-
-		if ( dns_src[0] == '\0' ) 
-			{
-			SnortSnprintf(dns_src, sizeof(dns_src), "[No DNS data]"); 
-			}
-
-	
-		if ( dns_dst[0] == '\0' ) 
-			{
-			SnortSnprintf(dns_dst, sizeof(dns_dst), "[No DNS data]");
-			}
-
 		
 		if ( ( SnortSnprintf(insert0, MAX_QUERY_LENGTH, 
 			"INSERT INTO "
@@ -5566,7 +5558,7 @@ void dbDNSData(Packet *p, DatabaseData* data)
 			{
 
 			LogMessage("** Warning: SnortSnprintf failed in %s() for SQL Insert!! Continuing.....\n", __FUNCTION__);
-			return;
+			return 1;
 			}
 
 		if (Insert(insert0, data,0) != 0) 
@@ -5578,13 +5570,13 @@ void dbDNSData(Packet *p, DatabaseData* data)
 
 
 free(insert0); 
-return;
+return 0;
 
 bad_query:
 
 free(insert0); 
 FatalError("** Error: DNS query failed in %s()! Abort!\n", __FUNCTION__); 
-return;
+return 1;
 
 }
 

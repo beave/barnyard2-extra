@@ -618,7 +618,7 @@ u_int32_t dbConnectionStatusODBC(dbReliabilityHandle *pdbRH);
 u_int32_t dbConnectionStatusMYSQL(dbReliabilityHandle *pdbRH);
 
 #ifdef DNS
-void dbDNSData(Packet *p, DatabaseData* data);
+int dbDNSData(Packet *p, DatabaseData* data);
 #endif
 
 #ifdef ENABLE_ODBC
