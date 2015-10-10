@@ -495,7 +495,7 @@ if test "x$enable_dns" = "xyes"; then
 fi
 
 AC_ARG_ENABLE(healthcheck,
-[  --enable-healthcheck             Enable Health Check  database support],
+[  --enable-healthcheck     Enable Health Check  database support],
        enable_healthcheck="$enableval", enable_healthcheck="no")
 if test "x$enable_healthcheck" = "xyes"; then
     CPPFLAGS="$CPPFLAGS -DHEALTHCHECK"
