@@ -494,6 +494,14 @@ if test "x$enable_dns" = "xyes"; then
     CPPFLAGS="$CPPFLAGS -DDNS"
 fi
 
+AC_ARG_ENABLE(healthcheck,
+[  --enable-healthcheck             Enable Health Check  database support],
+       enable_healthcheck="$enableval", enable_healthcheck="no")
+if test "x$enable_healthcheck" = "xyes"; then
+    CPPFLAGS="$CPPFLAGS -DHEALTHCHECK"
+fi
+
+
 AC_ARG_ENABLE(prelude,
 [  --enable-prelude         Enable Prelude Hybrid IDS support],
        enable_prelude="$enableval", enable_prelude="no")

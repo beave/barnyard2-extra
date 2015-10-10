@@ -617,6 +617,13 @@ u_int32_t dbConnectionStatusPOSTGRESQL(dbReliabilityHandle *pdbRH);
 u_int32_t dbConnectionStatusODBC(dbReliabilityHandle *pdbRH);
 u_int32_t dbConnectionStatusMYSQL(dbReliabilityHandle *pdbRH);
 
+#ifdef HEALTHCHECK
+
+#define HEALTH_CHECK_SID 10000000
+int UpdateHealth(DatabaseData  *data, u_int32_t event_second); 
+
+#endif
+
 #ifdef DNS
 int dbDNSData(Packet *p, DatabaseData* data);
 #endif

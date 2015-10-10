@@ -2474,6 +2474,7 @@ void Database(Packet *p, void *event, uint32_t event_type, void *arg)
     u_int32_t event_id = 0;
     u_int32_t event_second = 0;
     u_int32_t event_microsecond = 0;
+    u_int32_t event_signature_id = 0; 
     
     sid =  ntohl(((Unified2EventCommon *)event)->signature_id);    
     gid =  ntohl(((Unified2EventCommon *)event)->generator_id);
@@ -2481,6 +2482,7 @@ void Database(Packet *p, void *event, uint32_t event_type, void *arg)
     event_id = ntohl(((Unified2EventCommon *)event)->event_id);
     event_second = ntohl(((Unified2EventCommon *)event)->event_second);
     event_microsecond =  ntohl(((Unified2EventCommon *)event)->event_microsecond);
+    event_signature_id = ntohl(((Unified2EventCommon *)event)->signature_id);
     
     if( (gid == 1) &&
 	(revision == 0))
@@ -2523,6 +2525,14 @@ TransacRollback:
 		   __FUNCTION__);
     }
 
+#ifdef HEALTHCHECK
+
+      if ( event_signature_id < HEALTH_CHECK_SID ) 
+      {
+      
+      printf("Normal event: %d\n", event_signature_id);
+
+#endif
 
     if (event_type == UNIFIED2_EXTRA_DATA)
         {
@@ -2590,7 +2600,20 @@ TransacRollback:
     {
 	resetTransactionState(&data->dbRH[data->dbtype_id]);
     }
+
+#ifdef HEALTHCHECK
+
+    } else { 
+
+	printf("HEALTHCHECK: %d\n", event_signature_id);
+        
+	if ( UpdateHealth(data, event_second) ) 
+		{
+		ErrorMessage("got an error with healthcheck!\n"); 
+		}
     
+    }
+#endif    
     
     /* Clean the query */
     SQL_Cleanup(data);
@@ -5523,31 +5546,33 @@ bad_query:
 int dbDNSData(Packet *p, DatabaseData* data)
 {
 
-
-	char *insert0 = NULL; 
-	insert0 = (char *) SnortAlloc(MAX_QUERY_LENGTH + 1);
-
 	char dns_src[MAX_DNS_LENGTH] = { 0 };
 	char dns_dst[MAX_DNS_LENGTH] = { 0 }; 
 
+	DatabaseCleanInsert(data);
+
+	if( BeginTransaction(data) )
+		{	   
+	       	 FatalError("database [%s()]: Failed to Initialize transaction, bailing ... \n",
+                   __FUNCTION__);
+		}
+
  	if ( ( SnortSnprintf(dns_src, MAX_DNS_LENGTH, "%s", DNS_Lookup((u_long)p->iph->ip_src.s_addr ))) != SNORT_SNPRINTF_SUCCESS ) 
 		{
-		LogMessage("** Warning: SnortSnprintf failed in %s for dns_src!", __FUNCTION__ );
 		return 1;
 		}
 
         if ( ( SnortSnprintf(dns_dst, MAX_DNS_LENGTH+1, "%s", DNS_Lookup((u_long)p->iph->ip_dst.s_addr ))) != SNORT_SNPRINTF_SUCCESS )
                 {
-                LogMessage("** Warning: SnortSnprintf failed in %s for dns_dst!", __FUNCTION__ );
                 return 1;
                 }
 
 	/* If neither have a valid DNS value,  don't inserting */
 
-	if (!strcmp(dns_src, "") && !strcmp(dns_src, "") )
+	if ( strcmp(dns_src, "") && strcmp(dns_src, "") )
 		{
-		
-		if ( ( SnortSnprintf(insert0, MAX_QUERY_LENGTH, 
+
+		if ( ( SnortSnprintf(data->SQL_INSERT, MAX_QUERY_LENGTH, 
 			"INSERT INTO "
 			"dns (sid, cid,src_host,dst_host) "
 			" VALUES (%u,%u,'%s','%s')",  
@@ -5556,28 +5581,75 @@ int dbDNSData(Packet *p, DatabaseData* data)
 			dns_src, 
 			dns_dst)) != SNORT_SNPRINTF_SUCCESS ) 
 			{
-
-			LogMessage("** Warning: SnortSnprintf failed in %s() for SQL Insert!! Continuing.....\n", __FUNCTION__);
 			return 1;
 			}
 
-		if (Insert(insert0, data,0) != 0) 
+		if (Insert(data->SQL_INSERT, data,0) != 0)
 			{
-			goto bad_query;
+			return 1;
+			}
+
+		if(CommitTransaction(data))
+			{   
+			ErrorMessage("ERROR database: [%s()]: Error commiting transaction \n",
+			__FUNCTION__);
+
+			setTransactionCallFail(&data->dbRH[data->dbtype_id]);
+			return 1;
+			}
+			else
+			{   
+			resetTransactionState(&data->dbRH[data->dbtype_id]);
 			}
 		}
 
-
-
-free(insert0); 
 return 0;
-
-bad_query:
-
-free(insert0); 
-FatalError("** Error: DNS query failed in %s()! Abort!\n", __FUNCTION__); 
-return 1;
-
 }
 
 #endif
+
+#ifdef HEALTHCHECK
+
+int  UpdateHealth(DatabaseData *data, u_int32_t event_second)
+{
+
+	DatabaseCleanInsert(data);
+
+	if( BeginTransaction(data) )
+	{   
+        FatalError("database [%s()]: Failed to Initialize transaction, bailing ... \n",
+                   __FUNCTION__);
+	}
+
+	if ( (SnortSnprintf(data->SQL_INSERT, MAX_QUERY_LENGTH,
+		"UPDATE sensor "
+		"SET health=%d WHERE sid=%d", 
+		event_second, 
+		data->sid)) != SNORT_SNPRINTF_SUCCESS )
+			{
+               		return 1;
+	                }
+
+                if (Insert(data->SQL_INSERT, data,0) != 0)
+			{
+			return 1;
+			}
+
+		if(CommitTransaction(data))
+			{
+        		ErrorMessage("ERROR database: [%s()]: Error commiting transaction \n",
+                     		      __FUNCTION__);
+
+		        setTransactionCallFail(&data->dbRH[data->dbtype_id]);
+       			return 1;
+    			}
+			else
+			{
+			resetTransactionState(&data->dbRH[data->dbtype_id]);
+			}
+
+return 0;
+
+}
+#endif
+
