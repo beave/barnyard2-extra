@@ -39,6 +39,8 @@ https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
    Using the --enable-dns allows Barnyard2 to store DNS in the "dns" table
    associated with the sid/cid.
 
+   ./configure --enable-dns
+
 4. It's important to know the health of a sensor.  In the past, I would
    create a rule that would trigger when a specially crafted packet or
    log message was created.  We could then check the "event" table to validate
@@ -52,6 +54,7 @@ https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
    over 1000000,  it is considered a "health" event which means only the 
    "sensor" "health" column will be updated with the utime of the event. 
 
+   ./configure --enable-healthcheck
 
 ------------------------------------------------------------------------------
 0. SUMMARY
