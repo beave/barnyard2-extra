@@ -41,6 +41,13 @@ https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
 
    ./configure --enable-dns
 
+   DNS lookups do add overhead to the logging process.  If you find DNS is 
+   slowing your sensor down,   consider tuning and the following options 
+   in your /etc/resolv.conf
+
+   options timeout:1
+   options attempts:1
+
 4. It's important to know the health of a sensor.  In the past, I would
    create a rule that would trigger when a specially crafted packet or
    log message was created.  We could then check the "event" table to validate
