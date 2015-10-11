@@ -35,22 +35,23 @@ https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
    an alert.  She then packs up her laptop and leaves.  Joe now connects his
    laptop to the network gets the previous lease (IP) Mary had.  Looking up 
    the IP address would associate "Joe's" PC with "Mary's" infection.  In 
-   some cases,  recording the DNS of _when the alert_ happened is important. 
+   some cases,  recording the DNS of when the alert happened is important! 
    Using the --enable-dns allows Barnyard2 to store DNS in the "dns" table
    associated with the sid/cid.
 
-4. It's important to know the health of a sensor.  In the past,  what I would
-   do is create a rule that would trigger when a specially crafted packet or
+4. It's important to know the health of a sensor.  In the past, I would
+   create a rule that would trigger when a specially crafted packet or
    log message was created.  We could then check the "event" table to validate
    if the sensor is "up" and working properly.  The problem with this is that
-   you quickly fill your event tables will "ping" or "health checks".  To 
+   you quickly fill your event tables will "ping" or "health checks" data.  To 
    avoid this,  we can enable the --enable-healthcheck option.  The allows you
    to create a "health check" rule that will simply update the "health" 
-   column in the sensor table with the current utime.  This works by the
+   column in the "sensor" table with the current utime.  This works by the
    signature number.  By default,  if the signature ID is less than 
    1000000,  it is considered a normal signature.  If it is equal to or 
-   over 1000000,  it is considered a "health" event and will not be recorded 
-   in the event table.
+   over 1000000,  it is considered a "health" event which means only the 
+   "sensor" "health" column will be updated with the utime of the event. 
+
 
 ------------------------------------------------------------------------------
 0. SUMMARY
