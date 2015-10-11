@@ -4,7 +4,7 @@
 
 This is a "fork" of https://github.com/firnsy/barnyard2.  This version 
 contains functionality and features not found (yet) in the original 
-Barnyard2.  Right now,  they are:
+Barnyard2.  The differences are:
 
 1. Support of database storage of "ExtraData".  This includes: 
 	
@@ -26,6 +26,31 @@ Barnyard2.  Right now,  they are:
 can be found at:
 
 https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
+
+3. The ability to storge DNS data related to an event.  Why is this important?
+   Shouldn't your favorite console do the lookup when it needs to?  No, because
+   DNS can be dynamic.  Suppose Mary connects her laptop to your network. 
+   She receives a DHCP lease and dynamic DNS of "mary.example.com".  Her
+   machine is infected which causes Sagan/Snort/Suricata/etc to trigger
+   an alert.  She then packs up her laptop and leaves.  Joe now connects his
+   laptop to the network gets the previous lease (IP) Mary had.  Looking up 
+   the IP address would associate "Joe's" PC with "Mary's" infection.  In 
+   some cases,  recording the DNS of _when the alert_ happened is important. 
+   Using the --enable-dns allows Barnyard2 to store DNS in the "dns" table
+   associated with the sid/cid.
+
+4. It's important to know the health of a sensor.  In the past,  what I would
+   do is create a rule that would trigger when a specially crafted packet or
+   log message was created.  We could then check the "event" table to validate
+   if the sensor is "up" and working properly.  The problem with this is that
+   you quickly fill your event tables will "ping" or "health checks".  To 
+   avoid this,  we can enable the --enable-healthcheck option.  The allows you
+   to create a "health check" rule that will simply update the "health" 
+   column in the sensor table with the current utime.  This works by the
+   signature number.  By default,  if the signature ID is less than 
+   1000000,  it is considered a normal signature.  If it is equal to or 
+   over 1000000,  it is considered a "health" event and will not be recorded 
+   in the event table.
 
 ------------------------------------------------------------------------------
 0. SUMMARY
