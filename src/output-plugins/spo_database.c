@@ -2543,7 +2543,7 @@ TransacRollback:
 #ifdef DNS
     if ( dbDNSData(p,data) ) 
     {
-       FatalError("[dbDNSData()]: Failed, stopping processing!\n"); 
+       FatalError("[dbDNSData()]: Failed, processing stopped!\n"); 
     }
 
 #endif
@@ -2552,14 +2552,14 @@ TransacRollback:
     {
 	/* XXX */
 	setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-	FatalError("[dbProcessSignatureInformation()]: Failed, stopping processing!\n");
+	FatalError("[dbProcessSignatureInformation()]: Failed, processing stopped!\n");
     }
     
     if( dbProcessEventInformation(data,p,event,event_type,sig_id))
     {
 	/* XXX */
 	setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-	FatalError("[dbProcessEventInformation()]: Failed, stopping processing!\n");
+	FatalError("[dbProcessEventInformation()]: Failed, processing stopped!\n");
     }
 
     
@@ -2605,11 +2605,9 @@ TransacRollback:
 
     } else { 
 
-	printf("HEALTHCHECK: %d\n", event_signature_id);
-        
 	if ( UpdateHealth(data, event_second) ) 
 		{
-		ErrorMessage("got an error with healthcheck!\n"); 
+		FatalError("[UpdateHealth()]: Failed, processing stopped!\n");
 		}
     
     }
