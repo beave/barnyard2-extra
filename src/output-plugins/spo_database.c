@@ -2529,8 +2529,6 @@ TransacRollback:
 
       if ( event_signature_id < HEALTH_CHECK_SID ) 
       {
-      
-      printf("Normal event: %d\n", event_signature_id);
 
 #endif
 
