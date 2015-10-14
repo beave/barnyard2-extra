@@ -5563,9 +5563,9 @@ int dbDNSData(Packet *p, DatabaseData* data)
                 return 1;
                 }
 
-	/* If neither have a valid DNS value,  don't inserting */
+	/* If neither have a valid DNS value,  don't insert */
 
-	if ( strcmp(dns_src, "") && strcmp(dns_src, "") )
+	if ( strcmp(dns_src, "") && strcmp(dns_dst, "") )
 		{
 
 		if ( ( SnortSnprintf(data->SQL_INSERT, MAX_QUERY_LENGTH, 
