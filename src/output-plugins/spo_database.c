@@ -5545,46 +5545,56 @@ int dbDNSData(Packet *p, DatabaseData* data)
 	char dns_src[MAX_DNS_LENGTH] = { 0 };
 	char dns_dst[MAX_DNS_LENGTH] = { 0 }; 
 
- 	if ( ( SnortSnprintf(dns_src, MAX_DNS_LENGTH, "%s", DNS_Lookup((u_long)p->iph->ip_src.s_addr ))) != SNORT_SNPRINTF_SUCCESS ) 
-		{
-		FatalError("%s() at line %u : SnortSnprintf failed for dns_src\n", __FUNCTION__, __LINE__); 
-		}
-
-        if ( ( SnortSnprintf(dns_dst, MAX_DNS_LENGTH+1, "%s", DNS_Lookup((u_long)p->iph->ip_dst.s_addr ))) != SNORT_SNPRINTF_SUCCESS )
+        if ( p == NULL || data == NULL )
                 {
-		FatalError("%s() at line %u : SnortSnprintf failed for dns_dst\n", __FUNCTION__, __LINE__);
+		return 0; 
                 }
 
-	/* If neither have a valid DNS value,  don't insert */
-
-	if ( strcmp(dns_src, "") && strcmp(dns_dst, "") )
+        if (p->iph)
 		{
 
-
-	        DatabaseCleanInsert(data);
-		
-		if ( ( SnortSnprintf(data->SQL_INSERT, MAX_QUERY_LENGTH, 
-			"INSERT INTO "
-			"dns (sid, cid,src_host,dst_host) "
-			" VALUES (%u,%u,'%s','%s')",  
-			data->sid,
-			data->cid, 
-			dns_src, 
-			dns_dst)) != SNORT_SNPRINTF_SUCCESS ) 
+	 	if ( ( SnortSnprintf(dns_src, MAX_DNS_LENGTH, "%s", DNS_Lookup((u_long)p->iph->ip_src.s_addr ))) != SNORT_SNPRINTF_SUCCESS ) 
 			{
-			FatalError("%s() at line %u : SnortSnprintf failed for data->SQL_INSERT\n", __FUNCTION__, __LINE__);
+			FatalError("%s() at line %u : SnortSnprintf failed for dns_src\n", __FUNCTION__, __LINE__); 
 			}
 
-		if (Insert(data->SQL_INSERT, data,1) != 0)
+	        if ( ( SnortSnprintf(dns_dst, MAX_DNS_LENGTH+1, "%s", DNS_Lookup((u_long)p->iph->ip_dst.s_addr ))) != SNORT_SNPRINTF_SUCCESS )
+       	        	{
+			FatalError("%s() at line %u : SnortSnprintf failed for dns_dst\n", __FUNCTION__, __LINE__);
+       		        }
+
+		/* If neither have a valid DNS value,  don't insert */
+
+		if ( strcmp(dns_src, "") && strcmp(dns_dst, "") )
 			{
 
+		        DatabaseCleanInsert(data);
+		
+			if ( ( SnortSnprintf(data->SQL_INSERT, MAX_QUERY_LENGTH, 
+				"INSERT INTO "
+				"dns (sid, cid,src_host,dst_host) "
+				" VALUES (%u,%u,'%s','%s')",  
+				data->sid,
+				data->cid, 
+				dns_src, 
+				dns_dst)) != SNORT_SNPRINTF_SUCCESS ) 
+					{
+					FatalError("%s() at line %u : SnortSnprintf failed for data->SQL_INSERT\n", __FUNCTION__, __LINE__);
+					}
+
+			if (Insert(data->SQL_INSERT, data,1) != 0)
+				{
+
 #ifdef ENABLE_DB_TRANSACTIONS
-			LogMessage("%s() at line %u Insert() failed,  Rolling back transaction!\n", __FUNCTION__, __LINE__); 
-			RollbackTransaction(data);
+
+				LogMessage("%s() at line %u Insert() failed,  Rolling back transaction!\n", __FUNCTION__, __LINE__); 
+				RollbackTransaction(data);
+
 #endif
 	
-			FatalError("%s() at line %u : Insert() failed.\n", __FUNCTION__, __LINE__); 
-			
+				FatalError("%s() at line %u : Insert() failed.\n", __FUNCTION__, __LINE__); 
+				
+				}
 			}
 		}
 
