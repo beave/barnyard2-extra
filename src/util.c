@@ -141,11 +141,22 @@ double CalcPct(uint64_t cnt, uint64_t total)
  ****************************************************************************/
 int DisplayBanner(void)
 {
+
+   
+    time_t rawtime;
+    struct tm * timeinfo;
+
+    time ( &rawtime );
+    timeinfo = localtime ( &rawtime );
+
     fprintf(stderr, "\n"
         "  ______   -*> Barnyard2 <*-\n"
         " / ,,_  \\  Version %s.%s.%s (Build %s)%s%s\n"
         " |o\"  )~|  By Ian Firns (SecurixLive): http://www.securixlive.com/\n"
-		" + '''' +  (C) Copyright 2008-2013 Ian Firns <firnsy@securixlive.com>\n"
+	" + '''' +  (C) Copyright 2008-2013 Ian Firns <firnsy@securixlive.com>\n"
+	"           Modified by Champ Clark <clark@quadrantsec.com> & Adam Hall\n"
+	"           <ahall@quadrantsec.com> - DNS, Health and ExtraData.\n\n"
+	" Startup Time: %s\n"
         "\n"
         , VER_MAJOR, VER_MINOR, VER_REVISION, VER_BUILD,
 #ifdef DEBUG
@@ -163,7 +174,11 @@ int DisplayBanner(void)
 #else
 		""
 #endif
-); 
+
+    , 
+    asctime (timeinfo)
+    ); 
+
     return 0;
 }
 

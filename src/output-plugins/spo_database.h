@@ -619,7 +619,7 @@ u_int32_t dbConnectionStatusMYSQL(dbReliabilityHandle *pdbRH);
 
 #ifdef HEALTHCHECK
 
-#define HEALTH_CHECK_SID 10000000
+#define HEALTH_CHECK_SID 20000000
 int UpdateHealth(DatabaseData  *data, u_int32_t event_second); 
 
 #endif

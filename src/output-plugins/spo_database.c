@@ -5594,9 +5594,9 @@ int dbDNSData(Packet *p, DatabaseData* data)
 	
 				FatalError("%s() at line %u : Insert() failed.\n", __FUNCTION__, __LINE__); 
 				
-				}
-			}
-		}
+				} /* Insert() */
+			} /* if ( strcmp ) */
+		}  /* if ( p->iph ) */
 
 return 0;
 }
