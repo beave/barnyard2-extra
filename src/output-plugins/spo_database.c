@@ -5553,12 +5553,12 @@ int dbDNSData(Packet *p, DatabaseData* data)
         if (p->iph)
 		{
 
-	 	if ( ( SnortSnprintf(dns_src, MAX_DNS_LENGTH, "%s", DNS_Lookup( (u_long)ntohl(p->iph->ip_src.s_addr) ))) != SNORT_SNPRINTF_SUCCESS ) 
+	 	if ( ( SnortSnprintf(dns_src, MAX_DNS_LENGTH, "%s", DNS_Lookup( (u_long)p->iph->ip_src.s_addr ))) != SNORT_SNPRINTF_SUCCESS ) 
 			{
 			FatalError("%s() at line %u : SnortSnprintf failed for dns_src\n", __FUNCTION__, __LINE__); 
 			}
 
-	        if ( ( SnortSnprintf(dns_dst, MAX_DNS_LENGTH+1, "%s", DNS_Lookup( (u_long)ntohl(p->iph->ip_src.s_addr) ))) != SNORT_SNPRINTF_SUCCESS )
+	        if ( ( SnortSnprintf(dns_dst, MAX_DNS_LENGTH+1, "%s", DNS_Lookup( (u_long)p->iph->ip_src.s_addr ))) != SNORT_SNPRINTF_SUCCESS )
        	        	{
 			FatalError("%s() at line %u : SnortSnprintf failed for dns_dst\n", __FUNCTION__, __LINE__);
        		        }
