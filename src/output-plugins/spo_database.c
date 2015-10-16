@@ -5545,22 +5545,14 @@ int dbDNSData(Packet *p, DatabaseData* data)
 	char dns_src[MAX_DNS_LENGTH] = { 0 };
 	char dns_dst[MAX_DNS_LENGTH] = { 0 }; 
 
-	DatabaseCleanInsert(data);
-
-	if( BeginTransaction(data) )
-		{	   
-	       	 FatalError("database [%s()]: Failed to Initialize transaction, bailing ... \n",
-                   __FUNCTION__);
-		}
-
  	if ( ( SnortSnprintf(dns_src, MAX_DNS_LENGTH, "%s", DNS_Lookup((u_long)p->iph->ip_src.s_addr ))) != SNORT_SNPRINTF_SUCCESS ) 
 		{
-		return 1;
+		FatalError("%s() at line %u : SnortSnprintf failed for dns_src\n", __FUNCTION__, __LINE__); 
 		}
 
         if ( ( SnortSnprintf(dns_dst, MAX_DNS_LENGTH+1, "%s", DNS_Lookup((u_long)p->iph->ip_dst.s_addr ))) != SNORT_SNPRINTF_SUCCESS )
                 {
-                return 1;
+		FatalError("%s() at line %u : SnortSnprintf failed for dns_dst\n", __FUNCTION__, __LINE__);
                 }
 
 	/* If neither have a valid DNS value,  don't insert */
@@ -5568,6 +5560,9 @@ int dbDNSData(Packet *p, DatabaseData* data)
 	if ( strcmp(dns_src, "") && strcmp(dns_dst, "") )
 		{
 
+
+	        DatabaseCleanInsert(data);
+		
 		if ( ( SnortSnprintf(data->SQL_INSERT, MAX_QUERY_LENGTH, 
 			"INSERT INTO "
 			"dns (sid, cid,src_host,dst_host) "
@@ -5577,25 +5572,19 @@ int dbDNSData(Packet *p, DatabaseData* data)
 			dns_src, 
 			dns_dst)) != SNORT_SNPRINTF_SUCCESS ) 
 			{
-			return 1;
+			FatalError("%s() at line %u : SnortSnprintf failed for data->SQL_INSERT\n", __FUNCTION__, __LINE__);
 			}
 
-		if (Insert(data->SQL_INSERT, data,0) != 0)
+		if (Insert(data->SQL_INSERT, data,1) != 0)
 			{
-			return 1;
-			}
 
-		if(CommitTransaction(data))
-			{   
-			ErrorMessage("ERROR database: [%s()]: Error commiting transaction \n",
-			__FUNCTION__);
-
-			setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-			return 1;
-			}
-			else
-			{   
-			resetTransactionState(&data->dbRH[data->dbtype_id]);
+#ifdef ENABLE_DB_TRANSACTIONS
+			LogMessage("%s() at line %u Insert() failed,  Rolling back transaction!\n", __FUNCTION__, __LINE__); 
+			RollbackTransaction(data);
+#endif
+	
+			FatalError("%s() at line %u : Insert() failed.\n", __FUNCTION__, __LINE__); 
+			
 			}
 		}
 
@@ -5611,37 +5600,23 @@ int  UpdateHealth(DatabaseData *data, u_int32_t event_second)
 
 	DatabaseCleanInsert(data);
 
-	if( BeginTransaction(data) )
-	{   
-        FatalError("database [%s()]: Failed to Initialize transaction, bailing ... \n",
-                   __FUNCTION__);
-	}
-
 	if ( (SnortSnprintf(data->SQL_INSERT, MAX_QUERY_LENGTH,
 		"UPDATE sensor "
 		"SET health=%d WHERE sid=%d", 
 		event_second, 
 		data->sid)) != SNORT_SNPRINTF_SUCCESS )
 			{
-               		return 1;
+			FatalError("%s() at line %u : SnortSnprintf failed for data->SQL_INSERT\n", __FUNCTION__, __LINE__);
 	                }
 
-                if (Insert(data->SQL_INSERT, data,0) != 0)
+                if (Insert(data->SQL_INSERT, data, 1) != 0)
 			{
-			return 1;
-			}
 
-		if(CommitTransaction(data))
-			{
-        		ErrorMessage("ERROR database: [%s()]: Error commiting transaction \n",
-                     		      __FUNCTION__);
-
-		        setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-       			return 1;
-    			}
-			else
-			{
-			resetTransactionState(&data->dbRH[data->dbtype_id]);
+#ifdef ENABLE_DB_TRANSACTIONS
+			LogMessage("%s() at line %u Insert() failed,  Rolling back transaction!\n", __FUNCTION__, __LINE__);
+                        RollbackTransaction(data);
+#endif
+			FatalError("%s() at line %u : Insert() (UPDATE) failed.\n", __FUNCTION__, __LINE__);
 			}
 
 return 0;

@@ -229,7 +229,7 @@ u_int32_t GetCurrentTimestamp_STATIC(char *buf);
 
 u_int32_t string_sanitize_character(char *input,char ichar);
 
-char *DNS_Lookup(unsigned long u32_ip); 
+char *DNS_Lookup(u_long u32_ip); 
 
 /***********************************************************
  If you use any of the functions in this section, you need

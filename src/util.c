@@ -2761,7 +2761,7 @@ int BY2Strtoul(char *inStr,unsigned long *ul_ptr)
 /* This function does reverse DNS lookups.  This data is used for the "dns" 
  * table,  which is associated with the event */
 
-char *DNS_Lookup( unsigned long u32_ip)
+char *DNS_Lookup( u_long u32_ip)
 {
 
     char *ip_string = NULL;
