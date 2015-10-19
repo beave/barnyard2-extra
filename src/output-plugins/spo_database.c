@@ -2525,18 +2525,18 @@ TransacRollback:
 		   __FUNCTION__);
     }
 
+    if (event_type == UNIFIED2_EXTRA_DATA)
+        {
+                DatabaseExtra(event,data);
+                return;
+        }
+
 #ifdef HEALTHCHECK
 
       if ( event_signature_id < HEALTH_CHECK_SID ) 
       {
 
 #endif
-
-    if (event_type == UNIFIED2_EXTRA_DATA)
-        {
-	        DatabaseExtra(event,data);
-	        return;
-        }
 
 #ifdef DNS
     if ( dbDNSData(p,data) ) 
