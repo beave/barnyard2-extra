@@ -2585,20 +2585,6 @@ TransacRollback:
 	}
     }
     
-    if(CommitTransaction(data))
-    {
-	/* XXX */
-	ErrorMessage("ERROR database: [%s()]: Error commiting transaction \n",
-		     __FUNCTION__);
-	
-	setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-	goto bad_query;
-    }
-    else
-    {
-	resetTransactionState(&data->dbRH[data->dbtype_id]);
-    }
-
 #ifdef HEALTHCHECK
 
     } else { 
@@ -2610,6 +2596,21 @@ TransacRollback:
     
     }
 #endif    
+
+    if(CommitTransaction(data))
+    {   
+        /* XXX */
+        ErrorMessage("ERROR database: [%s()]: Error commiting transaction \n",
+                     __FUNCTION__);
+
+        setTransactionCallFail(&data->dbRH[data->dbtype_id]);
+        goto bad_query;
+    }
+    else
+    {   
+        resetTransactionState(&data->dbRH[data->dbtype_id]);
+    }
+
     
     /* Clean the query */
     SQL_Cleanup(data);
