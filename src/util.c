@@ -2796,6 +2796,13 @@ char *DNS_Lookup( u_long u32_ip)
    
     result = getnameinfo((struct sockaddr*)&sa, sizeof(sa), rhost, sizeof(rhost), NULL, 0, 0);
 
+    /* If the DNS server returns the same string we are looking up,  return nothing! */
+
+    if (!strcmp(rhost, ip_string)) 
+    	{
+	return(""); 
+	}
+
     if ( result != 0 ) 
     	{
 //		LogMessage("** Warning: DNS lookup failure for '%s' [Error: %s]. Continuing....\n", ip_string,  gai_strerror(result)); 
