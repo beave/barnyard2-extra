@@ -5464,7 +5464,7 @@ void DatabaseExtra(void *event, DatabaseData* data)
                     "extra (sid,cid,type,datatype,len,data) "
                     "VALUES (%u,%u,%u,%u,%u,:1)|%s",
                    data->sid,
-                   data->cid-1,
+                   data->cid-1,				/* I don't like this -1 */
                    ntohl(extraEvent->type),
                    ntohl(extraEvent->data_type),
                    len,
@@ -5483,7 +5483,7 @@ void DatabaseExtra(void *event, DatabaseData* data)
                     "extra (sid,cid,type,datatype,len,data) "
                     "VALUES (%u,%u,%u,%u,%u,'%s')",
                     data->sid,
-                    data->cid-1,
+                    data->cid-1,			/* I don't lik this -1 */
                     ntohl(extraEvent->type),
                     ntohl(extraEvent->data_type),
                     len,
