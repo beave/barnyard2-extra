@@ -50,16 +50,17 @@ https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
 
 4. It's important to know the health of a sensor.  In the past, I would
    create a rule that would trigger when a specially crafted packet or
-   log message was created.  We could then check the "event" table to validate
+   log message was received.  We could then check the "event" table to validate
    if the sensor is "up" and working properly.  The problem with this is that
    you quickly fill your event tables will "ping" or "health checks" data.  To 
    avoid this,  we can enable the --enable-healthcheck option.  The allows you
    to create a "health check" rule that will simply update the "health" 
    column in the "sensor" table with the current utime.  This works by the
    signature number.  By default,  if the signature ID is less than 
-   1000000,  it is considered a normal signature.  If it is equal to or 
-   over 1000000,  it is considered a "health" event which means only the 
-   "sensor" "health" column will be updated with the utime of the event. 
+   2000000,  it is considered a normal signature.  If it is equal to or 
+   greater than 2000000,  it is considered a "health" event which means
+   only the "sensor" "health" column will be updated with the utime of 
+   the event. 
 
    ./configure --enable-healthcheck
 
