@@ -564,7 +564,7 @@ u_int32_t snort_escape_string_STATIC(char *from, u_int32_t buffer_max_len ,Datab
 
 void DatabaseInit(char *);
 void DatabaseInitFinalize(int unused, void *arg);
-void DatabaseExtra(void *, DatabaseData *);
+int  dbProcessExtraData( DatabaseData *, void *, u_int32_t );
 void ParseDatabaseArgs(DatabaseData *data);
 void Database(Packet *, void *, uint32_t, void *);
 void SpoDatabaseCleanExitFunction(int, void *);

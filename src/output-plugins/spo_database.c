@@ -1845,7 +1845,7 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
 
 	break;
     }
-    
+   
     switch(data->dbtype_id)
     {
 	
@@ -2482,7 +2482,17 @@ void Database(Packet *p, void *event, uint32_t event_type, void *arg)
     event_id = ntohl(((Unified2EventCommon *)event)->event_id);
     event_second = ntohl(((Unified2EventCommon *)event)->event_second);
     event_microsecond =  ntohl(((Unified2EventCommon *)event)->event_microsecond);
-    event_signature_id = ntohl(((Unified2EventCommon *)event)->signature_id);
+
+    /* UNIFIED2_EXTRA_DATA doesn't have a "event_siganture_id".   If we are reading
+     * UNIFIED2_EXTRA_DATA,  we want this to remain 0 (not random contents from 
+     * memory */
+
+    if ( event_type != UNIFIED2_EXTRA_DATA ) 
+    	{
+    	event_signature_id = ntohl(((Unified2EventCommon *)event)->signature_id);
+	} else { 
+	event_signature_id = 0; 		/* Probably already 0, but just in case */
+	}
     
     if( (gid == 1) &&
 	(revision == 0))
@@ -2525,40 +2535,60 @@ TransacRollback:
 		   __FUNCTION__);
     }
 
-    if (event_type == UNIFIED2_EXTRA_DATA)
-        {
-                DatabaseExtra(event,data);
-                return;
-        }
-
 #ifdef HEALTHCHECK
 
-      if ( event_signature_id < HEALTH_CHECK_SID ) 
-      {
+    if ( event_signature_id < HEALTH_CHECK_SID ) 
+    {
 
 #endif
+
+    /* If a "normal" Unified2 event,  do normal things */
+
+    if ( event_type != UNIFIED2_EXTRA_DATA )
+    {
 
 #ifdef DNS
-    if ( dbDNSData(p,data) ) 
-    {
-       FatalError("[dbDNSData()]: Failed, processing stopped!\n"); 
-    }
+
+	/* We do this first for Quadrant "runner" reasons.  We want DNS data to be populated
+	   before the Quadrant console cache is populated.  If we don't do this first,  it
+	   can lead to a race condition where the runner populates packet/event data before
+           DNS lookups can be preformed. - Champ Clark */
+
+        if ( dbDNSData(p,data) )
+                {
+                FatalError("[dbDNSData()]: Failed, processing stopped!\n");
+                }
 
 #endif
 
-    if( dbProcessSignatureInformation(data,event,event_type,&sig_id))
-    {
-	/* XXX */
-	setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-	FatalError("[dbProcessSignatureInformation()]: Failed, processing stopped!\n");
-    }
+    	if( dbProcessSignatureInformation(data,event,event_type,&sig_id))
+	{
+		/* XXX */
+		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
+		FatalError("[dbProcessSignatureInformation()]: Failed, processing stopped!\n");
+        }
     
-    if( dbProcessEventInformation(data,p,event,event_type,sig_id))
-    {
-	/* XXX */
-	setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-	FatalError("[dbProcessEventInformation()]: Failed, processing stopped!\n");
+
+    	if( dbProcessEventInformation(data,p,event,event_type,sig_id))
+    		{
+		/* XXX */
+		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
+		FatalError("[dbProcessEventInformation()]: Failed, processing stopped!\n");
+    		}
+
+    
+    } else {
+
+        /* If it's Unified2,  we handle that data slightly differently! */
+
+    	if( dbProcessExtraData(data,event,event_type))
+    	{
+       		/* XXX */
+		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
+		FatalError("[dbProcessExtraData()]: Failed, processing stopped!\n");
+	}
     }
+
 
     
     if( (SQLMaxQuery = SQL_GetMaxQuery(data)))
@@ -2584,10 +2614,16 @@ TransacRollback:
 	    }
 	}
     }
-    
+
+
 #ifdef HEALTHCHECK
 
     } else { 
+    	
+	/* Health checks simply update the sensor_info.health database with the
+	 * latest sensor utime.  We don't clutter up the tables with this data.
+	 * This lets Quadrant "know" that a sensor is up and working.  Think of
+	 * it like "ping" data */
 
 	if ( UpdateHealth(data, event_second) ) 
 		{
@@ -2596,6 +2632,7 @@ TransacRollback:
     
     }
 #endif    
+
 
     if(CommitTransaction(data))
     {   
@@ -2615,8 +2652,15 @@ TransacRollback:
     /* Clean the query */
     SQL_Cleanup(data);
     
-    /* Increment the cid*/
-    data->cid++;
+    /* Increment the cid if it's normal Unifed2 data.  If it is UNIFIED2_EXTRA_DATA, 
+     * we don't want to do that quite yet.  We want our UNIFIED2_EXTRA_DATA cid to 
+     * line up with our normal Unified2 data */
+    
+    if ( event_type != UNIFIED2_EXTRA_DATA ) 
+    	{
+	data->cid++;
+    	}
+
     //LogMessage("Inserted a new event \n");
     /* Normal Exit Path */
 
@@ -5379,23 +5423,29 @@ void ODBCPrintError(DatabaseData *data,SQLSMALLINT iHandleType)
 #endif /* ENABLE_ODBC */
 
  /*******************************************************************************
-+ * Function: DatabaseExtra(void *event, DatabaseData *data)
++ * Function: dbProcessExtraData(void DatabaseData *data, void *event, 
+* * u_int32_t event_type)
 + *
 + * Purpose: Insert data into the database
 + *
 + * Arguments: event => pointer to the Unified2ExtraHeader event record
 + *            data => pointer to the instance data for this plugin
+* *	       event_type => unified2 event type
 + *
 + * Returns: void function
 + *
 + ******************************************************************************/
-void DatabaseExtra(void *event, DatabaseData* data)
+int dbProcessExtraData( DatabaseData *data, void *event, u_int32_t event_type )
 {
-    char *packet_data = NULL,
-            *packet_data_not_escaped = NULL,
-            *insert0 = NULL;
+
+    char *packet_data = NULL, *packet_data_not_escaped = NULL, *insert0 = NULL;
     u_char *extraData = NULL;
-    
+
+    if (data == NULL)
+	{   
+	return 1;
+	}
+
     Unified2ExtraData* extraEvent = (Unified2ExtraData*) (event + sizeof (Unified2ExtraDataHdr));
     int len = ntohl(extraEvent->blob_length) - sizeof (extraEvent->blob_length) - sizeof (extraEvent->data_type);
 
@@ -5464,7 +5514,7 @@ void DatabaseExtra(void *event, DatabaseData* data)
                     "extra (sid,cid,type,datatype,len,data) "
                     "VALUES (%u,%u,%u,%u,%u,:1)|%s",
                    data->sid,
-                   data->cid-1,				/* I don't like this -1 */
+                   data->cid-1,			
                    ntohl(extraEvent->type),
                    ntohl(extraEvent->data_type),
                    len,
@@ -5483,7 +5533,7 @@ void DatabaseExtra(void *event, DatabaseData* data)
                     "extra (sid,cid,type,datatype,len,data) "
                     "VALUES (%u,%u,%u,%u,%u,'%s')",
                     data->sid,
-                    data->cid-1,			/* I don't lik this -1 */
+                    data->cid-1,
                     ntohl(extraEvent->type),
                     ntohl(extraEvent->data_type),
                     len,
@@ -5508,7 +5558,7 @@ void DatabaseExtra(void *event, DatabaseData* data)
 #endif
         }
         free(insert0);
-        return;
+        return 0;
     }
 bad_query:
 
@@ -5533,12 +5583,25 @@ bad_query:
     	{
 	free(insert0);
 	}
+
+return 0;
 }
 
 #ifdef DNS
 
-/* dbDNSData() - Does reverse DNS lookups up p->iph->ip_src and p->iph->ip_dst
- * and stores them in the "dns" table. */
+ /*******************************************************************************
++ * Function: dbDNSData(Packet *p, DatabaseData *data)
++ *
++ * Purpose: Does DNS lookups of the event _at the time_ the event took place. 
+* *          stores DNS data in to the "dns" table related to the sid/cid of the
+* *          of the event. 
++ *
++ * Arguments: *p = Packet data (use for source/destination)
+* * 	       data => pointer to the instance data for this plugin
++ *
++ * Returns: int
++ *
++ ******************************************************************************/
 
 int dbDNSData(Packet *p, DatabaseData* data)
 {
@@ -5605,6 +5668,21 @@ return 0;
 #endif
 
 #ifdef HEALTHCHECK
+
+ /*******************************************************************************
++ * Function: UpdateHealth(DatabaseData *data, u_int32_t event_second)
++ *
++ * Purpose: Updates the sensor.health table with latest sensor utime.  Used 
+* *          as a means to keep track of sensor "health".  Think of this as a 
+* *          "ping" request.  A "special" Snort/Suricata/Sagan siganture has to
+* *          be made wih a signature ID >  HEALTH_CHECK_SID.
++ *
++ * Arguments: data => pointer to the instance data for this plugin
+* *            event_seconds => time this event was triggered
++ *
++ * Returns: int
++ *
++ ******************************************************************************/
 
 int  UpdateHealth(DatabaseData *data, u_int32_t event_second)
 {
