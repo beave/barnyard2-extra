@@ -1754,6 +1754,18 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
 	    return 1;
 	}
     }
+
+    if ( event_type != UNIFIED2_EXTRA_DATA )
+	{
+
+	if( dbProcessExtraData(data,event,event_type))
+		{	
+		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
+		FatalError("[dbProcessExtraData()]: Failed, processing stopped!\n");
+		}
+	return 0;
+
+	}
     
 
 /* Some timestring comments comments */
@@ -2544,8 +2556,8 @@ TransacRollback:
 
     /* If a "normal" Unified2 event,  do normal things */
 
-    if ( event_type != UNIFIED2_EXTRA_DATA )
-    {
+//    if ( event_type != UNIFIED2_EXTRA_DATA )
+//    {
 
 #ifdef DNS
 
@@ -2577,16 +2589,17 @@ TransacRollback:
     		}
 
     
-    } else {
+    //} else {
 
         /* If it's Unified2,  we handle that data slightly differently! */
 
-    	if( dbProcessExtraData(data,event,event_type))
-    	{
+    //	if( dbProcessExtraData(data,event,event_type))
+    //	{
        		/* XXX */
-		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
-		FatalError("[dbProcessExtraData()]: Failed, processing stopped!\n");
-	}
+    //		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
+    //		FatalError("[dbProcessExtraData()]: Failed, processing stopped!\n");
+    //	}
+
     }
 
 
@@ -2656,10 +2669,10 @@ TransacRollback:
      * we don't want to do that quite yet.  We want our UNIFIED2_EXTRA_DATA cid to 
      * line up with our normal Unified2 data */
     
-    if ( event_type != UNIFIED2_EXTRA_DATA ) 
-    	{
+//    if ( event_type != UNIFIED2_EXTRA_DATA ) 
+//    	{
 	data->cid++;
-    	}
+ //   	}
 
     //LogMessage("Inserted a new event \n");
     /* Normal Exit Path */
