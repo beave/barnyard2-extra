@@ -2600,7 +2600,7 @@ TransacRollback:
     //		FatalError("[dbProcessExtraData()]: Failed, processing stopped!\n");
     //	}
 
-    }
+//    }
 
 
     
