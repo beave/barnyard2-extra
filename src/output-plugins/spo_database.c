@@ -1155,6 +1155,10 @@ void ParseDatabaseArgs(DatabaseData *data)
 	{
 	    data->dbRH[data->dbtype_id].disablesigref = 1;
 	}
+        if(!strncasecmp(dbarg,KEYWORD_DISABLE_REFTABLE,strlen(KEYWORD_DISABLE_REFTABLE)))
+        {
+        data->dbRH[data->dbtype_id].disableref = 1;
+        }
 
 #ifdef ENABLE_MYSQL
 	/* Option declared here should be forced to dbRH[DB_MYSQL] */

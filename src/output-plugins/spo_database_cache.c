@@ -4508,7 +4508,11 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
 	goto func_fail;
     }
     
-    /* Update Reference cache */
+    /* Update Reference cache unless config specifies otherwise*/
+
+    if (!data->dbRH[data->dbtype_id].disableref) 
+    {
+
     SystemCacheElemPtr = *cacheHead;
     
     while(SystemCacheElemPtr != NULL)
@@ -4523,6 +4527,7 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
 	    }
 	}
 	SystemCacheElemPtr = SystemCacheElemPtr->next;
+    }
     }
     
     if(dbRefArray != NULL)
