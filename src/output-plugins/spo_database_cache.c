@@ -4436,7 +4436,7 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
     
     cacheSystemObj *SystemCacheElemPtr = NULL;
     dbSystemObj *dbSysArray = NULL;
-//    dbReferenceObj *dbRefArray = NULL;	 
+    dbReferenceObj *dbRefArray = NULL;	 
     
     u_int32_t array_length = 0;
 
@@ -4475,15 +4475,14 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
     
     /* Reset for re-use */
     array_length = 0;
-   
-    /* 
+    
     if( (ReferencePullDataStore(data,&dbRefArray,&array_length)))
     {
 	/* XXX */
-	//LogMessage("[%s()], Call to ReferencePullDataStore() failed. \n",
-	//	   __FUNCTION__);
-	//goto func_fail;
-    //}	
+	LogMessage("[%s()], Call to ReferencePullDataStore() failed. \n",
+		   __FUNCTION__);
+	goto func_fail;
+    }	
     
 #if DEBUG
     db_reference_object_count=array_length;
@@ -4510,8 +4509,6 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
     }
     
     /* Update Reference cache */
-
-    /*
     SystemCacheElemPtr = *cacheHead;
     
     while(SystemCacheElemPtr != NULL)
@@ -4527,16 +4524,13 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
 	}
 	SystemCacheElemPtr = SystemCacheElemPtr->next;
     }
-    */
-   
-    /* 
+    
     if(dbRefArray != NULL)
     {
         free(dbRefArray);
         dbRefArray = NULL;
         array_length = 0;
     }
-    */
     
     if(dbSysArray != NULL)
     {
@@ -4549,14 +4543,12 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
     
     
 func_fail:
-    /*
     if(dbRefArray != NULL)
     {
         free(dbRefArray);
         dbRefArray = NULL;
         array_length = 0;
     }
-    */
 
     if( dbSysArray != NULL)
     {
