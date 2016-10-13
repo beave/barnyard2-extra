@@ -64,6 +64,19 @@ https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
 
    ./configure --enable-healthcheck
 
+5. While barnyard2 has a flag to disable sig_reference table
+   (disable_signature_reference_table=1), we've added a option to disable
+   use of the reference table (disable_reference_table=1).  If you are
+   not using the Snort "reference" table,  this option allows barnyard2
+   to start much quicker.  For example:
+
+   output database: log, mysql, user=user dbname=snortdb host=localhost \
+   disable_signature_reference_table=1 disable_reference_table=1
+
+   This patch is based off Jim Hranicky's work.  His patch can be found at
+   (http://marc.info/?l=snort-users&m=143869778628989&w=2).  I've modified
+   it a bit more to skip more "reference" checks. 
+
 ------------------------------------------------------------------------------
 0. SUMMARY
 ------------------------------------------------------------------------------

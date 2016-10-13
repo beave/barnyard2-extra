@@ -4475,7 +4475,10 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
     
     /* Reset for re-use */
     array_length = 0;
-    
+   
+    if (!data->dbRH[data->dbtype_id].disableref) 
+    {
+ 
     if( (ReferencePullDataStore(data,&dbRefArray,&array_length)))
     {
 	/* XXX */
@@ -4483,11 +4486,16 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
 		   __FUNCTION__);
 	goto func_fail;
     }	
+    } 
     
 #if DEBUG
     db_reference_object_count=array_length;
 #endif
 
+    /* Update Reference cache unless config specifies otherwise */
+
+    if (!data->dbRH[data->dbtype_id].disableref) 
+    {
 
     if(array_length > 0)
     {
@@ -4508,7 +4516,6 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
 	goto func_fail;
     }
     
-    /* Update Reference cache */
     SystemCacheElemPtr = *cacheHead;
     
     while(SystemCacheElemPtr != NULL)
@@ -4523,6 +4530,13 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
 	    }
 	}
 	SystemCacheElemPtr = SystemCacheElemPtr->next;
+
+    }
+
+    } else { 
+
+    LogMessage("[%s()], Skipping population of 'reference' table as per configuration.\n", __FUNCTION__ ); 
+
     }
     
     if(dbRefArray != NULL)
@@ -4543,6 +4557,7 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
     
     
 func_fail:
+
     if(dbRefArray != NULL)
     {
         free(dbRefArray);
@@ -5873,11 +5888,23 @@ u_int32_t CacheSynchronize(DatabaseData *data)
 			   __FUNCTION__);
 		return 1;
 	    }
-	}
+	} else { 
+   
+            LogMessage("[%s()], Skipping population of 'sig_reference' table as per configuration.\n", __FUNCTION__ );
+        }
     }
     else
     {
+
+//	if(!data->dbRH[data->dbtype_id].disablesigref)
+//	{
+
 	LogMessage("\n[%s()],INFO: No system was found in cache (from signature map file), will not process or synchronize informations found in the database \n\n",__FUNCTION__);
+//	} else { 
+
+//	LogMessage("[%s()], Skipping population of 'sig_reference' table as per configuration.\n", __FUNCTION__ );
+
+//	}
     }
 #if DEBUG
 
