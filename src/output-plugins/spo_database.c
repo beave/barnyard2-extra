@@ -2472,6 +2472,9 @@ void Database(Packet *p, void *event, uint32_t event_type, void *arg)
        do not set a revision, in our context we will not log it to the database
        and print a informative messsage 
     */
+
+    u_int8_t used_cid_flag = 0; 
+
     u_int32_t sid = 0;
     u_int32_t gid = 0;
     u_int32_t revision = 0;
@@ -2551,46 +2554,67 @@ TransacRollback:
     if ( event_type != UNIFIED2_EXTRA_DATA )
     {
 
+	printf("- NOT Extra_data: %d\n", data->cid); 
+
 #ifdef DNS
+
+	used_cid_flag = 0; 
 
 	/* We do this first for Quadrant "runner" reasons.  We want DNS data to be populated
 	   before the Quadrant console cache is populated.  If we don't do this first,  it
 	   can lead to a race condition where the runner populates packet/event data before
            DNS lookups can be preformed. - Champ Clark */
 
+	printf(" dbDNSData: %d\n", data->cid); 
+
         if ( dbDNSData(p,data) )
                 {
                 FatalError("[dbDNSData()]: Failed, processing stopped!\n");
-                }
-
+                } else { 
+		used_cid_flag = 1; 
+		} 
+	
 #endif
+
+	printf(" dbProcessSignatureInformation: %d\n", data->cid);
 
     	if( dbProcessSignatureInformation(data,event,event_type,&sig_id))
 	{
 		/* XXX */
 		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
 		FatalError("[dbProcessSignatureInformation()]: Failed, processing stopped!\n");
-        }
+        } else { 
+	used_cid_flag = 1; 
+	} 
     
+
+	printf(" dbProcessEventInformation: %d\n", data->cid);
 
     	if( dbProcessEventInformation(data,p,event,event_type,sig_id))
     		{
 		/* XXX */
 		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
 		FatalError("[dbProcessEventInformation()]: Failed, processing stopped!\n");
-    		}
+    		} else { 
+		used_cid_flag = 1; 
+		}
 
     
     } else {
 
         /* If it's Unified2,  we handle that data slightly differently! */
 
+	printf(" dbProcessExtraData: %d\n", data->cid);
+
     	if( dbProcessExtraData(data,event,event_type))
     	{
        		/* XXX */
 		setTransactionCallFail(&data->dbRH[data->dbtype_id]);
 		FatalError("[dbProcessExtraData()]: Failed, processing stopped!\n");
-	}
+	} else { 
+	used_cid_flag = 0; 
+	} 
+
     }
 
 
@@ -2660,9 +2684,11 @@ TransacRollback:
      * we don't want to do that quite yet.  We want our UNIFIED2_EXTRA_DATA cid to 
      * line up with our normal Unified2 data */
     
-    if ( event_type != UNIFIED2_EXTRA_DATA ) 
+    if ( event_type != UNIFIED2_EXTRA_DATA && used_cid_flag == 1 ) 
     	{
 	data->cid++;
+	printf("Increment: %d\n", data->cid);
+
     	}
 
     //LogMessage("Inserted a new event \n");
@@ -5524,6 +5550,8 @@ int dbProcessExtraData( DatabaseData *data, void *event, u_int32_t event_type )
                    len,
                    packet_data_not_escaped);
 
+		   printf("- InEXtra: %s\n", insert0);
+
            if (ret != SNORT_SNPRINTF_SUCCESS)
                goto bad_query;
 
@@ -5542,6 +5570,8 @@ int dbProcessExtraData( DatabaseData *data, void *event, u_int32_t event_type )
                     ntohl(extraEvent->data_type),
                     len,
                     packet_data);
+
+	    printf("- InEXtra: %s\n", insert0);
 
             if (ret != SNORT_SNPRINTF_SUCCESS)
                 goto bad_query;
