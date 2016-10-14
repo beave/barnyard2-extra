@@ -103,9 +103,6 @@ static const char* FATAL_NO_SUPPORT_2 =
 #include "output-plugins/spo_database.h"
 
 
-u_int8_t first_pass = 0; 
-
-
 void DatabaseCleanSelect(DatabaseData *data)
 {
     
@@ -367,7 +364,6 @@ u_int32_t SynchronizeEventId(DatabaseData *data)
     }
     
     data->cid++;
-    first_pass = 1; 
 
 
     if( UpdateLastCid(data, data->sid, data->cid) < 0 )
@@ -5452,8 +5448,6 @@ int dbProcessExtraData( DatabaseData *data, void *event, u_int32_t event_type )
     char *packet_data = NULL, *packet_data_not_escaped = NULL, *insert0 = NULL;
     u_char *extraData = NULL;
 
-    int new_cid; 
-
     if (data == NULL)
 	{   
 	return 1;
@@ -5520,18 +5514,6 @@ int dbProcessExtraData( DatabaseData *data, void *event, u_int32_t event_type )
 	/* This factors in the very first data->cid++ that happens on startup.  This way, the extra
    	   data doesn't mistakenly reference the previous run! - Champ Clark III 11/14/2016 */
 
-	if ( first_pass == 1 ) 
-	   { 
-
-		new_cid = data->cid;
-
-	   } else { 
-
-		new_cid = data->cid-1; 
-		first_pass = 0; 
-	   }
-
-
         if (data->dbtype_id == DB_ORACLE) {
             /* Oracle field BLOB type case. We append unescaped
              * packet_payload data after query, which later in Insert()
@@ -5542,7 +5524,7 @@ int dbProcessExtraData( DatabaseData *data, void *event, u_int32_t event_type )
                     "extra (sid,cid,type,datatype,len,data) "
                     "VALUES (%u,%u,%u,%u,%u,:1)|%s",
                    data->sid,
-                   new_cid,
+                   data->cid - 1,
                    ntohl(extraEvent->type),
                    ntohl(extraEvent->data_type),
                    len,
@@ -5561,7 +5543,7 @@ int dbProcessExtraData( DatabaseData *data, void *event, u_int32_t event_type )
                     "extra (sid,cid,type,datatype,len,data) "
                     "VALUES (%u,%u,%u,%u,%u,'%s')",
                     data->sid,
-                    new_cid,
+                    data->cid - 1,
                     ntohl(extraEvent->type),
                     ntohl(extraEvent->data_type),
                     len,
