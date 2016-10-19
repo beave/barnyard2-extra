@@ -102,6 +102,7 @@ static const char* FATAL_NO_SUPPORT_2 =
 
 #include "output-plugins/spo_database.h"
 
+uint32_t was_health = 1;
 
 void DatabaseCleanSelect(DatabaseData *data)
 {
@@ -2552,6 +2553,8 @@ TransacRollback:
 
     if ( event_type != UNIFIED2_EXTRA_DATA )
     {
+	
+	was_health = 0;
 
 #ifdef DNS
 
@@ -2634,6 +2637,7 @@ TransacRollback:
 		FatalError("[UpdateHealth()]: Failed, processing stopped!\n");
 		}
 
+	was_health = 1;
 	use_cid_flag = 1; 
     
     }
@@ -5560,11 +5564,15 @@ int dbProcessExtraData( DatabaseData *data, void *event, u_int32_t event_type )
         if (ret != SNORT_SNPRINTF_SUCCESS)
             goto bad_query;
 
+	if ( was_health == 0 ) {
+
         if (Insert(insert0, data,1) == 0) {
 #ifdef ENABLE_DB_TRANSACTIONS
             RollbackTransaction(data);
 #endif
-        }
+          }
+	}
+
         free(insert0);
         return 0;
     }
