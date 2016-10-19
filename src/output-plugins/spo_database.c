@@ -590,12 +590,10 @@ void DatabaseInit(char *args)
     if (strncasecmp(data->facility, "log", 3) == 0)
     {
         AddFuncToOutputList(Database, OUTPUT_TYPE__LOG, data);
-	AddFuncToOutputList(Database, OUTPUT_TYPE__EXTRA, data);
     }
     else
     {
         AddFuncToOutputList(Database, OUTPUT_TYPE__ALERT, data);
-	AddFuncToOutputList(Database, OUTPUT_TYPE__EXTRA, data);
     }
 
 
