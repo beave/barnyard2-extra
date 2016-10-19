@@ -4492,6 +4492,13 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
     db_reference_object_count=array_length;
 #endif
 
+    /* On screwed up networks,  we might want to log frag'd packets. */
+
+    if (data->dbRH[data->dbtype_id].log_frag)
+    {
+       LogMessage("Configuration is set to log fragmented packets!\n");
+    }
+
     /* Update Reference cache unless config specifies otherwise */
 
     if (!data->dbRH[data->dbtype_id].disableref) 
@@ -4535,7 +4542,7 @@ u_int32_t SystemCacheSynchronize(DatabaseData *data,cacheSystemObj **cacheHead)
 
     } else { 
 
-    LogMessage("[%s()], Skipping population of 'reference' table as per configuration.\n", __FUNCTION__ ); 
+    LogMessage("Skipping population of 'reference' table as per configuration.\n"); 
 
     }
     
@@ -5890,7 +5897,7 @@ u_int32_t CacheSynchronize(DatabaseData *data)
 	    }
 	} else { 
    
-            LogMessage("[%s()], Skipping population of 'sig_reference' table as per configuration.\n", __FUNCTION__ );
+            LogMessage("Skipping population of 'sig_reference' table as per configuration.\n");
         }
     }
     else

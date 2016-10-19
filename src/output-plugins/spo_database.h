@@ -345,6 +345,7 @@ typedef struct _dbReliabilityHandle
      
     u_int8_t disablesigref; /* Allow user to prevent generation and creation of signature reference table */
     u_int8_t disableref; /* Allow user to prevent generation and creation of signature reference table */
+    u_int8_t log_frag; /* Enable/disable logging for frag'ed packets */
     
     struct _DatabaseData *dbdata; /* Pointer to parent structure used for call clarity */
     
@@ -501,6 +502,7 @@ typedef struct _DatabaseData
 #define KEYWORD_RECONNECT_SLEEP_TIME "reconnect_sleep_time"
 #define KEYWORD_DISABLE_SIGREFTABLE "disable_signature_reference_table"
 #define KEYWORD_DISABLE_REFTABLE "disable_reference_table"
+#define KEYWORD_LOG_FRAG "log_frag"
 
 #define KEYWORD_MYSQL_RECONNECT "mysql_reconnect"
 

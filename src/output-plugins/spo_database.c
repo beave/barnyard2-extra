@@ -102,7 +102,7 @@ static const char* FATAL_NO_SUPPORT_2 =
 
 #include "output-plugins/spo_database.h"
 
-uint32_t was_health = 1;
+uint8_t was_health = 1;
 
 void DatabaseCleanSelect(DatabaseData *data)
 {
@@ -1159,6 +1159,10 @@ void ParseDatabaseArgs(DatabaseData *data)
 	{
 	    data->dbRH[data->dbtype_id].disableref = 1;
 	}
+        if(!strncasecmp(dbarg,KEYWORD_LOG_FRAG,strlen(KEYWORD_LOG_FRAG)))
+        {
+            data->dbRH[data->dbtype_id].log_frag = 1;
+        }
 
 #ifdef ENABLE_MYSQL
 	/* Option declared here should be forced to dbRH[DB_MYSQL] */
@@ -1925,7 +1929,18 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
     
     if(p != NULL)
     {
-	if((!p->frag_flag) && (IPH_IS_VALID(p)))
+ 
+        /* Warn the user we got a frag'ed packet! */
+
+        if ( (p->frag_flag) && (!data->dbRH[data->dbtype_id].log_frag) )
+        {
+        LogMessage("Received a frag'd packet but dropping because coniguration told us to do so (log_frags=0).\n");
+        } 
+
+
+	/* If frag ignore,  unless told otherwise by log_frag = 1 */
+
+	if( ((!p->frag_flag) && (IPH_IS_VALID(p))) || ( data->dbRH[data->dbtype_id].log_frag && IPH_IS_VALID(p)) )
 	{
 
 	    
