@@ -59,8 +59,8 @@ https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
    to create a "health check" rule that will simply update the "health" 
    column in the "sensor" table with the current utime.  This works by the
    signature number.  By default,  if the signature ID is less than 
-   2000000,  it is considered a normal signature.  If it is equal to or 
-   greater than 2000000,  it is considered a "health" event which means
+   20,000,000,  it is considered a normal signature.  If it is equal to or 
+   greater than 20,000,000,  it is considered a "health" event which means
    only the "sensor" "health" column will be updated with the utime of 
    the event. 
 
