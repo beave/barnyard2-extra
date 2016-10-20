@@ -77,6 +77,19 @@ https://github.com/beave/barnyard2-extra/wiki/Barnyard2-Database-differences.
    (http://marc.info/?l=snort-users&m=143869778628989&w=2).  I've modified
    it a bit more to skip more "reference" checks. 
 
+6. By default,  Barnyard2 doesn't log "fragmented" packets.  On properly 
+   configured networks this is the correct thing to do.  The idea is 
+   Barnyard2 lets Snort/Suricata reassumble the packet. However, we've 
+   seen "screwy" network configurations where fragmented packets trigger
+   a signature but are not recorded in the database.  Rather than silently
+   "dropping" this data, the "log_frag" option allows Barnyard2 to record 
+   the data regardless of fragmentation.  Add the following to the 
+   "output database" line: 
+
+   log_frag=1 
+
+   To the barnyard2.conf line. 
+
 ------------------------------------------------------------------------------
 0. SUMMARY
 ------------------------------------------------------------------------------
