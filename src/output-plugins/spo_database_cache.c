@@ -5903,16 +5903,9 @@ u_int32_t CacheSynchronize(DatabaseData *data)
     else
     {
 
-//	if(!data->dbRH[data->dbtype_id].disablesigref)
-//	{
-
 	LogMessage("\n[%s()],INFO: No system was found in cache (from signature map file), will not process or synchronize informations found in the database \n\n",__FUNCTION__);
-//	} else { 
-
-//	LogMessage("[%s()], Skipping population of 'sig_reference' table as per configuration.\n", __FUNCTION__ );
-
-//	}
     }
+
 #if DEBUG
 
     DEBUG_WRAP(DebugMessage(DB_DEBUG,"================================================"

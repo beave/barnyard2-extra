@@ -1725,6 +1725,15 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
 		       event);
 	    return 1;
     }
+
+   
+	/* Warn the user we got a frag'ed packet! We'll log it if log_frag is set */
+        
+        if ( (p->frag_flag) && (!data->dbRH[data->dbtype_id].log_frag) )
+        {
+        LogMessage("Received a frag'd packet but dropping because coniguration told us to do so (log_frags=0).\n");
+	return 0; 
+        }
     
     
     /* 
@@ -1923,26 +1932,11 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
 	
 	break;
     }
-   
-    /* We do not log fragments! They are assumed to be handled
-       by the fragment reassembly pre-processor */
-    
-    if(p != NULL)
-    {
  
-        /* Warn the user we got a frag'ed packet! */
-
-        if ( (p->frag_flag) && (!data->dbRH[data->dbtype_id].log_frag) )
-        {
-        LogMessage("Received a frag'd packet but dropping because coniguration told us to do so (log_frags=0).\n");
-        } 
-
-
-	/* If frag ignore,  unless told otherwise by log_frag = 1 */
-
-	if( ((!p->frag_flag) && (IPH_IS_VALID(p))) || ( data->dbRH[data->dbtype_id].log_frag && IPH_IS_VALID(p)) )
+	/* Process packet data */
+ 
+	if ( IPH_IS_VALID(p) ) 
 	{
-
 	    
 	    switch(GET_IPH_PROTO(p))
 	    {
@@ -2426,7 +2420,6 @@ int dbProcessEventInformation(DatabaseData *data,Packet *p,
 		}
 	    }
 	}
-    }
     
     return 0;
     
