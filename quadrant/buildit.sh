@@ -4,7 +4,7 @@
 
 ./autogen.sh
 
-./configure --enable-dns --enable-healthcheck --prefix=/usr --with-mysql
+./configure --enable-dns --enable-healthcheck --prefix=/usr --with-mysql --with-mysql-libraries=/usr/lib/x86_64-linux-gnu
 
 make -j5
 
