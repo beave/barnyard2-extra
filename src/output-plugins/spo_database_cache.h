@@ -96,9 +96,9 @@
 ** Ref: http://www.postgresql.org/docs/9.1/static/datatype-binary.html
 
 #define PGSQL_SQL_INSERT_SPECIFIC_REFERENCE_SYSTEM "INSERT INTO reference_system (ref_system_name) VALUES (E'%s');"
-#define PGSQL_SQL_SELECT_SPECIFIC_REFERENCE_SYSTEM "SELECT ref_system_id FROM reference_system WHERE ref_system_name = E'%s';"
-#define PGSQL_SQL_INSERT_SPECIFIC_REF  "INSERT INTO reference (ref_system_id,ref_tag) VALUES ('%u',E'%s');"
-#define PGSQL_SQL_SELECT_SPECIFIC_REF  "SELECT ref_id FROM reference WHERE ref_system_id = '%u' AND ref_tag = E'%s';"
+#define PGSQL_SQL_SELECT_SPECIFIC_REFERENCE_SYSTEM "SELECT `ref_system_id` FROM reference_system WHERE ref_system_name = E'%s';"
+#define PGSQL_SQL_INSERT_SPECIFIC_REF  "INSERT INTO reference (`ref_system_id`,ref_tag) VALUES ('%u',E'%s');"
+#define PGSQL_SQL_SELECT_SPECIFIC_REF  "SELECT ref_id FROM reference WHERE `ref_system_id` = '%u' AND ref_tag = E'%s';"
 #define PGSQL_SQL_INSERT_CLASSIFICATION "INSERT INTO sig_class (sig_class_name) VALUES (E'%s');"
 #define PGSQL_SQL_SELECT_SPECIFIC_CLASSIFICATION "SELECT sig_class_id FROM sig_class WHERE sig_class_name = E'%s';"
 #define PGSQL_SQL_INSERT_SIGNATURE "INSERT INTO signature (sig_sid, sig_gid, sig_rev, sig_class_id, sig_priority, sig_name) VALUES ('%u','%u','%u','%u','%u',E'%s');"
