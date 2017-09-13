@@ -624,12 +624,16 @@ u_int32_t dbConnectionStatusMYSQL(dbReliabilityHandle *pdbRH);
 #ifdef HEALTHCHECK
 
 #define HEALTH_CHECK_SID 20000000
-int UpdateHealth(DatabaseData  *data, u_int32_t event_second); 
+int UpdateHealth(DatabaseData *data, u_int32_t event_second); 
 
 #endif
 
 #ifdef DNS
 int dbDNSData(Packet *p, DatabaseData* data);
+#endif
+
+#ifdef QUADRANT
+int dbQuadrant(DatabaseData *data, u_int32_t sig_id, Packet *p);
 #endif
 
 #ifdef ENABLE_ODBC

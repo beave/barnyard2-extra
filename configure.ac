@@ -465,6 +465,13 @@ if eval "echo $host_cpu|grep -i sparc >/dev/null"; then
     fi
 fi
 
+AC_ARG_ENABLE(quadrant,          
+[  --enable-quadrant             Enable Quadrant Information Security specific support],
+       enable_quadrant="$enableval", enable_quadrant="no")
+if test "x$enable_quadrant" = "xyes"; then
+    CPPFLAGS="$CPPFLAGS -DQUADRANT"
+fi
+
 AC_ARG_ENABLE(ipv6,
 [  --enable-ipv6            Enable IPv6 support],
        enable_ipv6="$enableval", enable_ipv6="no")
