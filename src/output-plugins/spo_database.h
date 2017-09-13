@@ -633,7 +633,7 @@ int dbDNSData(Packet *p, DatabaseData* data);
 #endif
 
 #ifdef QUADRANT
-int dbQuadrant(DatabaseData *data, u_int32_t sig_id, Packet *p);
+int dbQuadrant(Packet *p, DatabaseData *data, u_int32_t sig_id);
 #endif
 
 #ifdef ENABLE_ODBC
