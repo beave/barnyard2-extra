@@ -1,7 +1,14 @@
 
 ******************************************************************************
-<h1> README </h1>
+      THIS PROJECT IS NO LONGER BEING ACTIVELY MAINTAINED OR DEVELOPED
 ******************************************************************************
+
+This project is no longer being maintained.  We've started a new project 
+called "Meer" that reads Sagan and Suricata "EVE" log formats and "spools"
+the to a traditional Snort/Barnyard2 style database.  That project can 
+be found at
+
+https://github.com/beave/meer
 
 
 ------------------------------------------------------------------------------
